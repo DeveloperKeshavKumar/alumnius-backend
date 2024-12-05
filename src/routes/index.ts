@@ -12,9 +12,9 @@ router.get('/', (req, res) => {
 })
 
 router.use('/auth', authRouter);
-router.use('/event', eventRouter);
+router.use('/events', eventRouter);
 router.use('/event-register', eventRegistrationRouter);
-router.use('/job', jobsRouter);
+router.use('/jobs', jobsRouter);
 router.use('/success-stories', successStoriesRouter);
 
 

@@ -5,7 +5,8 @@ import { eq, and } from "drizzle-orm";
 
 export const createJob = async (req: Request, res: Response): Promise<void> => {
    try {
-      const { title, description, company, location, salary, applicationLink, alumniId } = req.body;
+      const { title, description, company, location, salary, applicationLink } = req.body;
+      const alumniId = req.user?.id;
 
       if (!title || !description || !company || !alumniId) {
          res.status(400).json({
@@ -59,7 +60,7 @@ export const getAllJobs = async (_req: Request, res: Response): Promise<void> =>
 export const getJobById = async (req: Request, res: Response): Promise<void> => {
    try {
       const { id } = req.params;
-      const [job] = await db.select().from(jobsTable).where(and(eq(jobsTable.id, id), eq(jobsTable.isDeleted, "N"))).limit(1);
+      const [job] = await db.select().from(jobsTable).where(and(eq(jobsTable.id, id), eq(jobsTable.isDeleted, 'N'))).limit(1);
 
       if (!job) {
          res.status(404).json({
@@ -87,7 +88,7 @@ export const updateJob = async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
       const updates = req.body;
 
-      const [updatedJob] = await db.update(jobsTable).set(updates).where(eq(jobsTable.id, id)).returning();
+      const [updatedJob] = await db.update(jobsTable).set(updates).where(and(eq(jobsTable.id, id), eq(jobsTable.isDeleted, 'N'))).returning();
 
       if (!updatedJob) {
          res.status(404).json({

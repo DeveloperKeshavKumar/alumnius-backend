@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import { db } from '../config/db';
 import { eventsTable } from '../schemas';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 export const createEvent = async (req: Request, res: Response): Promise<void> => {
    try {
       const { title, description, location, isPublic } = req.body;
       const eventDate = new Date(req.body.date);
 
-      if (!title || !description || !eventDate || !location ) {
+      if (!title || !description || !eventDate || !location) {
          res.status(400).json({
             success: false,
             message: "All fields (title, description, date, location) are required.",
@@ -35,7 +35,7 @@ export const createEvent = async (req: Request, res: Response): Promise<void> =>
          success: false,
          message: "Internal Server Error",
          error: error.message,
-         date: new Date(req.body.date) 
+         date: new Date(req.body.date)
       });
    }
 };
@@ -60,7 +60,7 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
 export const getEventById = async (req: Request, res: Response): Promise<void> => {
    try {
       const { id } = req.params;
-      const [event] = await db.select().from(eventsTable).where(eq(eventsTable.id, id));
+      const [event] = await db.select().from(eventsTable).where(and(eq(eventsTable.id, id), eq(eventsTable.isDeleted, 'N')));
 
       if (!event) {
          res.status(404).json({
@@ -90,7 +90,7 @@ export const updateEvent = async (req: Request, res: Response): Promise<void> =>
 
       const [updatedEvent] = await db.update(eventsTable)
          .set({ title, description, date, location, isPublic })
-         .where(eq(eventsTable.id, id))
+         .where(and(eq(eventsTable.id, id), eq(eventsTable.isDeleted, 'N')))
          .returning();
 
       if (!updatedEvent) {
